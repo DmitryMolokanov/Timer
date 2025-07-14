@@ -43,8 +43,15 @@ function App() {
           <img src={menu} alt="menu" />
         </div>
       </div>
-      <span>{timeConverter}</span>
-      <button onClick={startTimer}>{!start ? "Start" : "Pause"}</button>
+      <div className='content'>
+        <div className='timer'>
+          <span>{timeConverter}</span>
+        </div>
+        <div className='group-btn'>
+          <button>Reset</button>
+          <button onClick={startTimer}>{!start ? "Start" : "Pause"}</button>
+        </div>
+      </div>
     </div>
   );
 }

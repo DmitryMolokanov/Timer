@@ -6,5 +6,5 @@ html,body {
 
 :root {
   --header-height: 50px;
-  --footer-height: 50px;
+  --btn-container-height: 50px
 }
