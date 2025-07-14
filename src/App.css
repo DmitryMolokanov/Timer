@@ -1,0 +1,21 @@
+.app-layout{
+  display: flex;
+  flex-direction: column;
+}
+
+.header{
+    width: 100%;
+    height: var(--header-height);
+    background-color: black;
+}
+
+.header__menu-container{
+    width: 30px;
+    height: 30px;
+    padding: calc((var(--header-height) - 30px) / 2);
+}
+
+.header__menu-container > img {
+    width: 100%;
+    height: 100%;
+}
