@@ -1,0 +1,16 @@
+{
+    "name": "Boxing Timer",
+    "short_name": "Boxing Timer",
+    "description": "A progressive web app that will help you train",
+    "icons": [
+      {
+        "src": "timer.svg",
+        "sizes": "24x24",
+        "type": "image/png"
+      }
+    ],
+    "start_url": "/index.html",
+    "display": "fullscreen",
+    "theme_color": "#64aee3",
+    "background_color": "#64aee3"
+  }
