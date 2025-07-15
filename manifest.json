@@ -1,0 +1,15 @@
+{
+  "name": "Boxing timer",
+  "short_name": "Boxing Timer",
+  "icons": [
+    {
+      "src": "/assets/icons/timer.svg",
+      "sizes": "192x192",
+      "type": "image/svg"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff"
+}
