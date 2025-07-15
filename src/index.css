@@ -8,7 +8,15 @@ html,body {
     font-family: "Source Sans 3", sans-serif;
 }
 
+button {
+  appearance: none;
+  padding: 0;
+  border: 0;
+}
+
 :root {
   --header-height: 50px;
-  --btn-container-height: 50px
+  --btn-container-height: 50px;
+  --start-timer-color: #4169e1;
+  --break-timer-color: #ff4a00;
 }
