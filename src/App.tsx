@@ -10,6 +10,7 @@ function App() {
   const [initBreakTimer, setInitBreackTimer] = useState<InitTimer>({ min: 1, sec: 0 })
   const [isShowSettings, setInitShowSettings] = useState(false)
 
+
   const showSettings = () => {
     setInitShowSettings(prev => !prev)
   }

@@ -1,117 +1,145 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type FC } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FC,
+} from "react";
 import bellSound from "../assets/sound/boxingBell.mp3";
 import type { InitTimer } from "../types/Timer";
 
 interface TimerProps {
-    initTimer: InitTimer
-    initBreakTimer: InitTimer
+  initTimer: InitTimer;
+  initBreakTimer: InitTimer;
 }
 
 const Timer: FC<TimerProps> = ({ initTimer, initBreakTimer }) => {
-    const [min, setMin] = useState(3);
-    const [sec, setSec] = useState(0);
-    const [start, setStart] = useState(false);
-    const [breakRound, setBreakRound] = useState(false);
-    const [round, setRound] = useState(1);
+  const [min, setMin] = useState(initTimer.min);
+  const [sec, setSec] = useState(initTimer.sec);
+  const [start, setStart] = useState(false);
+  const [breakRound, setBreakRound] = useState(false);
+  const [round, setRound] = useState(1);
 
-    const timerRef = useRef<number | undefined>(undefined)
+  const timerRef = useRef<number | undefined>(undefined);
 
-    const startTimer = () => {
-        setStart((prev) => !prev);
-    };
-
-    const decrementMin = () => {
-        setMin((prev) => prev - 1);
-        setSec(59);
+  //не выключать экран во время работы
+  const requestWakeLock = async () => {
+    try {
+      await navigator.wakeLock.request("screen");
+    } catch (err) {
+      console.log(err);
     }
+  };
 
-    const decrementSec = () => {
-        timerRef.current = setTimeout(() => setSec((prev) => prev - 1), 1000);
-        return () => clearTimeout(timerRef.current);
-    }
+  const startTimer = () => {
+    setStart((prev) => !prev);
+  };
 
-    const playSoundBell = () => {
-        const startBellSound = new Audio(bellSound);
-        return startBellSound.play();
-    }
+  const decrementMin = () => {
+    setMin((prev) => prev - 1);
+    setSec(59);
+  };
 
-    const startBreak = useCallback(() => {
-        playSoundBell()
-        setBreakRound(true);
-        setMin(initBreakTimer.min);
-        setSec(initBreakTimer.sec);
-    }, [initBreakTimer])
+  const decrementSec = () => {
+    timerRef.current = setTimeout(() => setSec((prev) => prev - 1), 1000);
+    return () => clearTimeout(timerRef.current);
+  };
 
-    const startNextRound = useCallback(() => {
-        playSoundBell()
-        setBreakRound(false);
-        setStart(true);
-        setRound((prev) => prev + 1);
-        setMin(initTimer.min);
-        setSec(initTimer.sec);
-    }, [initTimer])
+  const playSoundBell = () => {
+    const startBellSound = new Audio(bellSound);
+    return startBellSound.play();
+  };
 
-    const resetTimer = () => {
-        setStart(false);
-        setBreakRound(false)
-        setMin(initTimer.min);
-        setSec(initTimer.sec);
-        return clearTimeout(timerRef.current)
-    };
+  const startBreak = useCallback(() => {
+    playSoundBell();
+    setBreakRound(true);
+    setMin(initBreakTimer.min);
+    setSec(initBreakTimer.sec);
+  }, [initBreakTimer]);
 
-    const isTimerFinished = min === 0 && sec === 0
+  const startNextRound = useCallback(() => {
+    playSoundBell();
+    setBreakRound(false);
+    setStart(true);
+    setRound((prev) => prev + 1);
+    setMin(initTimer.min);
+    setSec(initTimer.sec);
+  }, [initTimer]);
 
-    useEffect(() => {
+  const resetTimer = () => {
+    setStart(false);
+    setBreakRound(false);
+    setMin(initTimer.min);
+    setSec(initTimer.sec);
+    return clearTimeout(timerRef.current);
+  };
 
-        if (start || breakRound) {
+  const isTimerFinished = min === 0 && sec === 0;
 
-            // гонг
-            if (initTimer.min === min && initTimer.sec === sec && start) {
-                playSoundBell()
-            }
+  useEffect(() => {
+    if (start || breakRound) {
 
-            // декремент минут
-            if (min > 0 && sec === 0) {
-                decrementMin()
-                return
-            }
+      requestWakeLock() // оставить экран включенным
 
-            // декремент секунд
-            if (sec > 0 && start) {
-                decrementSec()
-            }
+      // гонг
+      if (initTimer.min === min && initTimer.sec === sec && start) {
+        playSoundBell();
+      }
 
-            // изменение начала раунда и отдыха
-            if (isTimerFinished) {
-                if (!breakRound) {
-                    startBreak()
-                } else {
-                    startNextRound()
-                }
-            }
+      // декремент минут
+      if (min > 0 && sec === 0) {
+        decrementMin();
+        return;
+      }
+
+      // декремент секунд
+      if (sec > 0 && start) {
+        decrementSec();
+      }
+
+      // изменение начала раунда и отдыха
+      if (isTimerFinished) {
+        if (!breakRound) {
+          startBreak();
+        } else {
+          startNextRound();
         }
-    }, [start, sec, min, breakRound, initTimer, isTimerFinished, startBreak, startNextRound]);
+      }
+    }
+  }, [
+    start,
+    sec,
+    min,
+    breakRound,
+    initTimer,
+    isTimerFinished,
+    startBreak,
+    startNextRound,
+  ]);
 
+  const timeConverter = useMemo(() => {
+    return `${min.toString().padStart(2, "0")} : ${sec.toString().padStart(2, "0")}`;
+  }, [min, sec]);
 
-    const timeConverter = useMemo(() => {
-        return `${min.toString().padStart(2, "0")} : ${sec.toString().padStart(2, "0")}`;
-    }, [min, sec]);
-
-    return (
-        <div className={`content ${start ? 'content-start' : ""} ${breakRound ? 'content-break' : ''}`}>
-            <div className="timer">
-                <div className="timer__round-container">
-                    <span>Round</span>
-                    <span>{round}</span>
-                </div>
-                <span>{timeConverter}</span>
-            </div>
-            <div className="group-btn">
-                <button onClick={resetTimer}>Reset</button>
-                <button onClick={startTimer}>{!start ? "Start" : "Pause"}</button>
-            </div>
+  return (
+    <div
+      className={`content ${start ? "content-start" : ""} ${breakRound ? "content-break" : ""
+        }`}
+    >
+      <div className="timer">
+        <div className="timer__round-container">
+          <span>Round</span>
+          <span>{round}</span>
         </div>
-    )
+        <span>{timeConverter}</span>
+      </div>
+      <div className="group-btn">
+        <button onClick={resetTimer}>Reset</button>
+        <button onClick={startTimer}>{!start ? "Start" : "Pause"}</button>
+      </div>
+    </div>
+  );
 };
 
-export default Timer
+export default Timer;

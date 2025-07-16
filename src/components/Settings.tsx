@@ -75,7 +75,7 @@ const Settings: FC<SettingsProps> = ({ setInitTimer, setInitBreackTimer }) => {
 
     return (
         <div className="settings">
-            <h3>Установить время таймера</h3>
+            <h2>Установить время таймера</h2>
             <div className='settings__item'>
                 <div className='settings__time'>
                     <span>Минуты</span>
@@ -98,7 +98,7 @@ const Settings: FC<SettingsProps> = ({ setInitTimer, setInitBreackTimer }) => {
                 </div>
             </div>
 
-            <h3>Установить время отдыха</h3>
+            <h2>Установить время отдыха</h2>
             <div className='settings__item'>
                 <div className='settings__time'>
                     <span>Минуты</span>

@@ -6,6 +6,8 @@
 }
 
 .header {
+  display: flex;
+  justify-content: flex-end;
   width: 100%;
   height: var(--header-height);
   background-color: black;
@@ -95,13 +97,28 @@
   justify-content: space-between;
 }
 
+.settings__time > span {
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+
 .settings__counter{
   display: flex;
   gap: 1rem;
 }
 
+.settings__counter > span {
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+
 .settings__btn{
   background-color:inherit;
+}
+
+.settings__btn > img {
+  width: 2rem;
+  height: 2rem;
 }
 
 .btn-main{
@@ -110,4 +127,5 @@
   padding: .5rem 1rem;
   color:white;
   border-radius: 5px;
+  font-size: 1.3rem;
 }
