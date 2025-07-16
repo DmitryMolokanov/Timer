@@ -80,7 +80,7 @@ const Timer: FC<TimerProps> = ({ initTimer, initBreakTimer }) => {
   useEffect(() => {
     if (start || breakRound) {
 
-      requestWakeLock() // оставить экран включенным
+      requestWakeLock() // оставить экран
 
       // гонг
       if (initTimer.min === min && initTimer.sec === sec && start) {
@@ -106,6 +106,9 @@ const Timer: FC<TimerProps> = ({ initTimer, initBreakTimer }) => {
           startNextRound();
         }
       }
+    } else {
+      console.log('else')
+      return clearTimeout(timerRef.current)
     }
   }, [
     start,
@@ -119,7 +122,9 @@ const Timer: FC<TimerProps> = ({ initTimer, initBreakTimer }) => {
   ]);
 
   const timeConverter = useMemo(() => {
-    return `${min.toString().padStart(2, "0")} : ${sec.toString().padStart(2, "0")}`;
+    return `${min.toString().padStart(2, "0")} : ${sec
+      .toString()
+      .padStart(2, "0")}`;
   }, [min, sec]);
 
   return (
@@ -132,7 +137,11 @@ const Timer: FC<TimerProps> = ({ initTimer, initBreakTimer }) => {
           <span>Round</span>
           <span>{round}</span>
         </div>
-        <span>{timeConverter}</span>
+        <div className="timer__timer-container">
+          <span >
+            {timeConverter}
+          </span>
+        </div>
       </div>
       <div className="group-btn">
         <button onClick={resetTimer}>Reset</button>

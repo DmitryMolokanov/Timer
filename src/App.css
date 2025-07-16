@@ -10,7 +10,7 @@
   justify-content: flex-end;
   width: 100%;
   height: var(--header-height);
-  background-color: black;
+  background-color: var(--pause-timer-color) ;
 }
 
 .header__menu-container {
@@ -28,6 +28,8 @@
   display: flex;
   flex-direction: column;
   min-height: calc(100vh - var(--header-height));
+  background-color: var(--pause-timer-color);
+  color: white;
 }
 
 .content-start{
@@ -64,11 +66,17 @@
   border-radius: 1rem;
 }
 
+.timer__timer-container{
+  display: flex;
+  justify-content: center;
+  width: 100vw;
+}
+
 .group-btn {
   display: flex;
   height: var(--btn-container-height);
   width: 100%;
-  background-color: black;
+  background-color: var(--pause-timer-color);
 }
 
 .group-btn > button {
@@ -82,7 +90,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  height: 100vh;
   padding: 1rem 2rem;
+  background-color: var(--pause-timer-color);
+  color: var(--text-color);
 }
 
 .settings__item{

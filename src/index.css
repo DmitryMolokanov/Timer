@@ -18,5 +18,7 @@ button {
   --header-height: 50px;
   --btn-container-height: 50px;
   --start-timer-color: #4169e1;
+  --pause-timer-color: #2B2B2B;
   --break-timer-color: #ff4a00;
+  --text-color:#EEEEEE;
 }
