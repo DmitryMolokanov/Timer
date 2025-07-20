@@ -7,7 +7,10 @@ import {
   type FC,
 } from "react";
 import bellSound from "../assets/sound/boxingBell.mp3";
+import beep from '../assets/sound/beep.mp3'
+import knock from '../assets/sound/knock.mp3'
 import type { InitTimer } from "../types/Timer";
+
 
 interface TimerProps {
   initTimer: InitTimer;
@@ -46,20 +49,20 @@ const Timer: FC<TimerProps> = ({ initTimer, initBreakTimer }) => {
     return () => clearTimeout(timerRef.current);
   };
 
-  const playSoundBell = () => {
-    const startBellSound = new Audio(bellSound);
+  const playSound = (sound: string) => {
+    const startBellSound = new Audio(sound);
     return startBellSound.play();
   };
 
   const startBreak = useCallback(() => {
-    playSoundBell();
+    playSound(bellSound);
     setBreakRound(true);
     setMin(initBreakTimer.min);
     setSec(initBreakTimer.sec);
   }, [initBreakTimer]);
 
   const startNextRound = useCallback(() => {
-    playSoundBell();
+    playSound(bellSound);
     setBreakRound(false);
     setStart(true);
     setRound((prev) => prev + 1);
@@ -84,7 +87,16 @@ const Timer: FC<TimerProps> = ({ initTimer, initBreakTimer }) => {
 
       // гонг
       if (initTimer.min === min && initTimer.sec === sec && start) {
-        playSoundBell();
+        playSound(bellSound);
+      }
+
+      // до конца раунда 30 сек.
+      if (min === 0 && sec === 30 && !breakRound) {
+        playSound(beep)
+      }
+      // до начала раунда 10 сек
+      if (breakRound && min === 0 && sec === 10) {
+        playSound(knock)
       }
 
       // декремент минут
