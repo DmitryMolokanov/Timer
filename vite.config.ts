@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       workbox: {
-        globPatterns: ['**/*.{js,jsx,ts,tsx,css,html,svg, mp3}'],
+        globPatterns: ['**/*.{js,jsx,ts,tsx,css,html,svg,mp3}'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -21,7 +21,7 @@ export default defineConfig({
               },
               cacheableResponse: {
                 statuses: [0, 200]
-              }
+              },
             }
           },
         ]
