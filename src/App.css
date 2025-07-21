@@ -27,7 +27,7 @@
 .content {
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - var(--header-height));
+  min-height: calc(100vh - var(--header-height) - var(--btn-container-height));
   background-color: var(--pause-timer-color);
   color: white;
 }
@@ -90,7 +90,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 100vh;
+  box-sizing: border-box;
+  min-height: calc(100vh - var(--header-height));
   padding: 1rem 2rem;
   background-color: var(--pause-timer-color);
   color: var(--text-color);
@@ -146,6 +147,6 @@
   font-size: 1.3rem;
   padding: .5rem 1rem;
   margin-top: 2rem;
-  background-color: rgb(251, 37, 37);
+  background-color: rgb(244, 71, 71);
   border-radius: 1rem;
 }
