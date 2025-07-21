@@ -100,13 +100,13 @@ const Timer: FC<TimerProps> = ({ initTimer, initBreakTimer }) => {
       }
 
       // декремент минут
-      if (min > 0 && sec === 0) {
+      if (min > 0 && sec < 0) {
         decrementMin();
         return;
       }
 
       // декремент секунд
-      if (sec > 0 && start) {
+      if (sec >= 0 && start) {
         decrementSec();
       }
 
@@ -119,7 +119,6 @@ const Timer: FC<TimerProps> = ({ initTimer, initBreakTimer }) => {
         }
       }
     } else {
-      console.log('else')
       return clearTimeout(timerRef.current)
     }
   }, [

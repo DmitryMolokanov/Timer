@@ -7,12 +7,27 @@ import type { InitTimer } from '../types/Timer';
 interface SettingsProps {
     setInitTimer: (arg: InitTimer) => void
     setInitBreackTimer: (arg: InitTimer) => void
+    setInitShowSettings: (arg: boolean) => void
 }
 
-const Settings: FC<SettingsProps> = ({ setInitTimer, setInitBreackTimer }) => {
+const Settings: FC<SettingsProps> = ({ setInitTimer, setInitBreackTimer, setInitShowSettings }) => {
 
     const [timer, setTimer] = useState({ min: 0, sec: 0 })
     const [timerBreak, setTimerBreak] = useState({ min: 0, sec: 0 })
+    const [errMessage, setErrMessage] = useState('')
+
+
+    const validation = () => {
+        if (timer.min === 0 && timer.sec === 0) {
+            setErrMessage('Set the round time')
+            return false
+        }
+        if (timerBreak.min === 0 && timerBreak.sec === 0) {
+            setErrMessage('Set a break time')
+            return false
+        }
+        return true
+    }
 
     // таймер
     const decrementMin = () => {
@@ -67,10 +82,10 @@ const Settings: FC<SettingsProps> = ({ setInitTimer, setInitBreackTimer }) => {
     }
 
     const saveData = () => {
-        if (timer.min === 0 && timer.sec === 0) return
-        if (timerBreak.min === 0 && timerBreak.sec === 0) return
+        if (!validation()) return
         setInitTimer(timer)
         setInitBreackTimer(timerBreak)
+        setInitShowSettings(false)
     }
 
     return (
@@ -126,6 +141,12 @@ const Settings: FC<SettingsProps> = ({ setInitTimer, setInitBreackTimer }) => {
             >
                 Save
             </button>
+            {errMessage
+                ? <div className='error-message'>
+                    <span>{errMessage}</span>
+                </div>
+                : null
+            }
         </div>
     )
 };

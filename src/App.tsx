@@ -27,7 +27,11 @@ function App() {
       {
         !isShowSettings
           ? <Timer initTimer={initTimer} initBreakTimer={initBreakTimer} />
-          : <Settings setInitTimer={setInitTimer} setInitBreackTimer={setInitBreackTimer} />
+          : <Settings
+            setInitTimer={setInitTimer}
+            setInitBreackTimer={setInitBreackTimer}
+            setInitShowSettings={setInitShowSettings}
+          />
       }
     </div>
   );
