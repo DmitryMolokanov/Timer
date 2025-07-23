@@ -37,6 +37,10 @@
   color: white;
 }
 
+.content-time-is-running-out {
+  animation: isRunningOut 2s infinite alternate linear
+}
+
 .content-break{
   background-color: var(--break-timer-color);
   color: white;
@@ -149,4 +153,16 @@
   margin-top: 2rem;
   background-color: rgb(244, 71, 71);
   border-radius: 1rem;
+}
+
+@keyframes isRunningOut {
+  from {
+   background: var(--start-timer-color);
+  }
+  75% {
+    background: var(--start-timer-color);
+  }
+  to {
+   background: var(--break-timer-color);
+  }
 }

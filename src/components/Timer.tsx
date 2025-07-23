@@ -73,6 +73,7 @@ const Timer: FC<TimerProps> = ({ initTimer, initBreakTimer }) => {
   const resetTimer = () => {
     setStart(false);
     setBreakRound(false);
+    setRound(1)
     setMin(initTimer.min);
     setSec(initTimer.sec);
     return clearTimeout(timerRef.current);
@@ -112,6 +113,7 @@ const Timer: FC<TimerProps> = ({ initTimer, initBreakTimer }) => {
 
       // изменение начала раунда и отдыха
       if (isTimerFinished) {
+        clearTimeout(timerRef.current)
         if (!breakRound) {
           startBreak();
         } else {
@@ -140,8 +142,13 @@ const Timer: FC<TimerProps> = ({ initTimer, initBreakTimer }) => {
 
   return (
     <div
-      className={`content ${start ? "content-start" : ""} ${breakRound ? "content-break" : ""
-        }`}
+      className={
+        `content 
+        ${start ? "content-start" : ""} 
+        ${breakRound ? "content-break" : ""}
+        ${min === 0 && sec <= 30 && start && !breakRound ? "content-time-is-running-out" : ""}
+        `
+      }
     >
       <div className="timer">
         <div className="timer__round-container">
