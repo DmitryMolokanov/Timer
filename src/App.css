@@ -38,7 +38,7 @@
 }
 
 .content-time-is-running-out {
-  animation: isRunningOut 2s infinite alternate linear
+  animation: isRunningOut 2s infinite alternate ease-in-out
 }
 
 .content-break{
