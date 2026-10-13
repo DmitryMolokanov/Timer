@@ -25,6 +25,7 @@ function App() {
   return (
     <div className="app-layout">
       <div className="header">
+        {isShowSettings && <h1 className="header__title">Настройки</h1>}
         {needRefresh && (
           <button className="header__update" onClick={() => updateServiceWorker(true)}>
             Обновить приложение
@@ -32,10 +33,16 @@ function App() {
         )}
         <button
           className="header__menu-container"
-          aria-label="Настройки"
+          aria-label={isShowSettings ? "Закрыть настройки" : "Настройки"}
           onClick={() => setIsShowSettings((prev) => !prev)}
         >
-          <img src={menu} alt="" />
+          {isShowSettings ? (
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          ) : (
+            <img src={menu} alt="" />
+          )}
         </button>
       </div>
       {/* таймер остаётся смонтированным, чтобы открытие настроек не сбрасывало тренировку;

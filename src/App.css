@@ -17,6 +17,15 @@
   background-color: var(--pause-timer-color) ;
 }
 
+.header__title {
+  flex: 1;
+  margin: 0;
+  padding-left: 20px;
+  color: var(--text-color);
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
 .header__update {
   margin-right: auto;
   margin-left: 1rem;
@@ -35,7 +44,8 @@
   background-color: inherit;
 }
 
-.header__menu-container > img {
+.header__menu-container > img,
+.header__menu-container > svg {
   display: block;
   width: 100%;
   height: 100%;
@@ -215,72 +225,234 @@
   }
 }
 
-.settings{
+/* экран настроек: готовые режимы сверху, своя настройка раскрывается, «Сохранить» прижата к низу */
+.settings {
   display: flex;
   flex: 1;
   flex-direction: column;
-  align-items: center;
-  box-sizing: border-box;
-  padding: 1rem 2rem calc(1rem + env(safe-area-inset-bottom, 0px));
   background-color: var(--pause-timer-color);
+  color: var(--text-color);
+  --settings-muted: rgba(238, 238, 238, .6);
+  --settings-line: rgba(238, 238, 238, .18);
+  --settings-tile: rgba(255, 255, 255, .06);
+}
+
+.settings__body {
+  flex: 1;
+  padding: 4px 20px 20px;
+}
+
+.settings__label {
+  margin: 8px 0;
+  color: var(--settings-muted);
+  font-size: .95rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.presets {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.preset {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 2px solid transparent;
+  border-radius: 16px;
+  background-color: var(--settings-tile);
   color: var(--text-color);
 }
 
-.settings__item{
-  display: flex;
-  flex-direction: column;
-  width: 100%;
+.preset--active {
+  border-color: var(--start-timer-color);
+  background-color: rgba(65, 105, 225, .16);
 }
 
-.settings__time {
+.preset__digits {
+  font-family: "Audiowide", sans-serif;
+  font-size: 2.3rem;
+  line-height: 1;
+  letter-spacing: 1px;
+}
+
+/* пропорция работа / отдых в цветах таймера */
+.preset__ratio {
   display: flex;
+  gap: 3px;
   width: 100%;
+  height: 6px;
+}
+
+.preset__ratio > span {
+  border-radius: 3px;
+}
+
+.preset__ratio-round {
+  background-color: var(--start-timer-color);
+}
+
+.preset__ratio-break {
+  background-color: var(--break-timer-color);
+}
+
+.preset__caption {
+  color: var(--settings-muted);
+  font-size: .95rem;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.preset__check {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: var(--start-timer-color);
+}
+
+.settings__custom-toggle {
+  display: flex;
   justify-content: space-between;
-}
-
-.settings__time > span {
+  align-items: center;
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px 0;
+  border-top: 1px solid var(--settings-line);
+  background-color: transparent;
+  color: var(--text-color);
+  font-size: 1.2rem;
   font-weight: 700;
-  font-size: 1.3rem;
 }
 
-.settings__counter{
+.settings__custom-toggle svg {
+  transition: transform .25s;
+}
+
+.settings__custom-toggle--open svg {
+  transform: rotate(90deg);
+}
+
+/* блок «Раунд» / «Отдых»: подпись слева, время справа, ▲▼ над и под цифрами */
+.phase {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  padding: 4px 8px 4px 16px;
+  border-radius: 16px;
+  background-color: var(--settings-tile);
+}
+
+.phase__title {
   display: flex;
   align-items: center;
-  gap: 1rem;
-}
-
-.settings__counter > span {
-  min-width: 2ch;
-  text-align: center;
+  gap: 8px;
+  font-size: 1.15rem;
   font-weight: 700;
-  font-size: 1.3rem;
 }
 
-.settings__btn{
-  background-color:inherit;
+.phase__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
 }
 
-.settings__btn > img {
-  display: block;
-  width: 2rem;
-  height: 2rem;
+.phase__dot--round {
+  background-color: var(--start-timer-color);
 }
 
-.btn-main{
-  margin-top: 1rem;
-  padding: .5rem 1.5rem;
-  background-color: inherit;
-  color:white;
-  border: 1px solid white;
-  border-radius: 5px;
-  font-size: 1.3rem;
+.phase__dot--break {
+  background-color: var(--break-timer-color);
 }
 
-.error-message{
-  font-size: 1.3rem;
-  padding: .5rem 1rem;
-  margin-top: 2rem;
-  background-color: rgb(244, 71, 71);
-  border-radius: 1rem;
+.picker {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-family: "Audiowide", sans-serif;
+}
+
+.picker__column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.picker__value {
+  /* цифры Audiowide разной ширины: фиксируем по самой широкой паре «00», чтобы двоеточия стояли ровно */
+  width: 1.9em;
+  font-size: 2.3rem;
+  line-height: 1.05;
+  text-align: center;
+}
+
+.picker__colon {
+  font-size: 2.1rem;
+}
+
+.picker__step {
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 32px;
+  border-radius: 10px;
+  background-color: transparent;
+  color: var(--text-color);
+}
+
+.picker__step:active {
+  background-color: rgba(255, 255, 255, .1);
+}
+
+.picker__step:disabled {
+  opacity: .25;
+}
+
+.settings__footer {
+  position: sticky;
+  bottom: 0;
+  padding: 10px 20px calc(14px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--settings-line);
+  background-color: var(--pause-timer-color);
+}
+
+.settings__error {
+  margin: 0 0 8px;
+  color: #ff8a7a;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.settings__save {
+  width: 100%;
+  height: 52px;
+  border-radius: 14px;
+  background-color: var(--start-timer-color);
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+/* низкие экраны (iPhone SE): карточки чуть мельче, чтобы раскрытая настройка помещалась без прокрутки */
+@media (max-height: 680px) {
+  .preset__digits {
+    font-size: 2rem;
+  }
+
+  .preset__caption {
+    font-size: .85rem;
+    line-height: 1.2;
+  }
 }
 

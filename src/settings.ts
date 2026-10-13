@@ -16,7 +16,16 @@ const DEFAULT_SETTINGS: TimerSettings = {
   break: { min: 1, sec: 0 },
 };
 
+// готовые режимы «минуты работы / минуты отдыха»
+export const PRESETS: TimerSettings[] = [
+  { round: { min: 3, sec: 0 }, break: { min: 1, sec: 0 } },
+  { round: { min: 2, sec: 0 }, break: { min: 1, sec: 0 } },
+];
+
 export const toMs = ({ min, sec }: InitTimer) => (min * 60 + sec) * 1000;
+
+export const isSameSettings = (a: TimerSettings, b: TimerSettings) =>
+  toMs(a.round) === toMs(b.round) && toMs(a.break) === toMs(b.break);
 
 const isValidTime = (value: unknown): value is InitTimer => {
   const t = value as InitTimer | null;
