@@ -19,10 +19,9 @@ import {
 interface TimerProps {
   initTimer: InitTimer;
   initBreakTimer: InitTimer;
-  hidden?: boolean;
 }
 
-const Timer: FC<TimerProps> = ({ initTimer, initBreakTimer, hidden }) => {
+const Timer: FC<TimerProps> = ({ initTimer, initBreakTimer }) => {
   const roundMs = toMs(initTimer);
   const breakMs = toMs(initBreakTimer);
 
@@ -127,7 +126,7 @@ const Timer: FC<TimerProps> = ({ initTimer, initBreakTimer, hidden }) => {
     .join(" ");
 
   return (
-    <div className={className} hidden={hidden}>
+    <div className={className}>
       <div className="timer">
         <div className="timer__round-container">
           <span>Round</span>

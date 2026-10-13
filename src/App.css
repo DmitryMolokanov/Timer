@@ -4,6 +4,50 @@
   min-height: 100vh;
   /* dvh учитывает выезжающие панели мобильного браузера */
   min-height: 100dvh;
+  overflow-x: clip;
+  /* горизонтальные движения пальца отдаются свайпу настроек (hooks/useSlidePanel.ts) */
+  touch-action: pan-y;
+}
+
+/* экран таймера; при открытии настроек слегка уезжает влево */
+.app-screen {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.app-dim {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  background-color: black;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* настройки выезжают справа поверх таймера */
+.settings-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--pause-timer-color);
+  transform: translateX(100%);
+}
+
+.slide-animating .app-screen,
+.slide-animating .app-dim,
+.slide-animating .settings-panel {
+  transition: transform .32s cubic-bezier(.2, .8, .2, 1), opacity .32s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide-animating .app-screen,
+  .slide-animating .app-dim,
+  .slide-animating .settings-panel {
+    transition-duration: .01s;
+  }
 }
 
 .header {
@@ -57,10 +101,6 @@
   flex-direction: column;
   background-color: var(--pause-timer-color);
   color: white;
-}
-
-.content[hidden] {
-  display: none;
 }
 
 .content-start{
@@ -230,6 +270,7 @@
   display: flex;
   flex: 1;
   flex-direction: column;
+  min-height: 0;
   background-color: var(--pause-timer-color);
   color: var(--text-color);
   --settings-muted: rgba(238, 238, 238, .6);
@@ -239,6 +280,7 @@
 
 .settings__body {
   flex: 1;
+  overflow-y: auto;
   padding: 4px 20px 20px;
 }
 
