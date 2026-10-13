@@ -1,17 +1,18 @@
-html,body {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: "Source Sans 3", sans-serif;
-    background-color: var(--pause-timer-color);
-    /* поведение как у нативного приложения: без «резинки», выделения текста и подсветки нажатий */
-    overscroll-behavior: none;
-    -webkit-user-select: none;
-    user-select: none;
-    -webkit-touch-callout: none;
-    -webkit-tap-highlight-color: transparent;
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
+html,
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Source Sans 3", sans-serif;
+  background-color: var(--pause-timer-color);
+  /* поведение как у нативного приложения: без «резинки», выделения текста и подсветки нажатий */
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 button {
@@ -24,9 +25,9 @@ button {
 
 :root {
   --header-height: 50px;
-  --btn-container-height: 50px;
+  --btn-container-height: 80px;
   --start-timer-color: #4169e1;
   --pause-timer-color: #2B2B2B;
   --break-timer-color: #ff4a00;
-  --text-color:#EEEEEE;
+  --text-color: #EEEEEE;
 }
