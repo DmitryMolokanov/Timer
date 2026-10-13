@@ -1,35 +1,56 @@
 .app-layout {
   display: flex;
   flex-direction: column;
-  min-width: 100vw;
   min-height: 100vh;
+  /* dvh учитывает выезжающие панели мобильного браузера */
+  min-height: 100dvh;
 }
 
 .header {
   display: flex;
+  flex: none;
+  align-items: center;
   justify-content: flex-end;
-  width: 100%;
   height: var(--header-height);
+  /* отступ под вырез и статус-бар (viewport-fit=cover) */
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) 0 env(safe-area-inset-left, 0px);
   background-color: var(--pause-timer-color) ;
 }
 
+.header__update {
+  margin-right: auto;
+  margin-left: 1rem;
+  padding: .25rem .75rem;
+  background-color: inherit;
+  color: var(--text-color);
+  border: 1px solid var(--text-color);
+  border-radius: 5px;
+}
+
 .header__menu-container {
+  box-sizing: content-box;
   width: 30px;
   height: 30px;
   padding: calc((var(--header-height) - 30px) / 2);
+  background-color: inherit;
 }
 
 .header__menu-container > img {
+  display: block;
   width: 100%;
   height: 100%;
 }
 
 .content {
   display: flex;
+  flex: 1;
   flex-direction: column;
-  min-height: calc(100vh - var(--header-height) - var(--btn-container-height));
   background-color: var(--pause-timer-color);
   color: white;
+}
+
+.content[hidden] {
+  display: none;
 }
 
 .content-start{
@@ -48,15 +69,14 @@
 
 .timer {
   display: flex;
+  flex: 1;
   align-items: center;
   flex-direction: column;
   gap: 4rem;
   width: 100%;
-  height: calc(
-    100vh - var(--header-height) - var(--btn-container-height) - 2rem
-  );
   font-family: "Audiowide", sans-serif;
-  font-size: 5rem;
+  /* «00 : 00» должно помещаться и на узких экранах */
+  font-size: min(5rem, 16vw);
   margin-top: 2rem;
 }
 
@@ -73,12 +93,16 @@
 .timer__timer-container{
   display: flex;
   justify-content: center;
-  width: 100vw;
+  width: 100%;
+  font-variant-numeric: tabular-nums;
 }
 
 .group-btn {
   display: flex;
+  flex: none;
   height: var(--btn-container-height);
+  /* отступ над полоской жестов */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   width: 100%;
   background-color: var(--pause-timer-color);
 }
@@ -92,11 +116,11 @@
 
 .settings{
   display: flex;
+  flex: 1;
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
-  min-height: calc(100vh - var(--header-height));
-  padding: 1rem 2rem;
+  padding: 1rem 2rem calc(1rem + env(safe-area-inset-bottom, 0px));
   background-color: var(--pause-timer-color);
   color: var(--text-color);
 }
@@ -120,10 +144,13 @@
 
 .settings__counter{
   display: flex;
+  align-items: center;
   gap: 1rem;
 }
 
 .settings__counter > span {
+  min-width: 2ch;
+  text-align: center;
   font-weight: 700;
   font-size: 1.3rem;
 }
@@ -133,6 +160,7 @@
 }
 
 .settings__btn > img {
+  display: block;
   width: 2rem;
   height: 2rem;
 }

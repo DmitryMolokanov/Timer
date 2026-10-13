@@ -1,169 +1,151 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type FC,
-} from "react";
-import bellSound from "../assets/sound/boxingBell.mp3";
-import beep from '../assets/sound/beep.mp3'
-import knock from '../assets/sound/knock.mp3'
+import { useCallback, useEffect, useRef, useState, type FC } from "react";
 import type { InitTimer } from "../types/Timer";
+import { sounds } from "../audio";
+import { useWakeLock } from "../hooks/useWakeLock";
+import { toMs } from "../settings";
+import {
+  advance,
+  initialState,
+  phaseDuration,
+  soundEvents,
+  ROUND_WARNING_MS,
+  SOUND_HORIZON_MS,
+  TICK_MS,
+  type TimerState,
+} from "../timeline";
 
+const pad = (n: number) => n.toString().padStart(2, "0");
 
 interface TimerProps {
   initTimer: InitTimer;
   initBreakTimer: InitTimer;
+  hidden?: boolean;
 }
 
-const Timer: FC<TimerProps> = ({ initTimer, initBreakTimer }) => {
-  const [min, setMin] = useState(initTimer.min);
-  const [sec, setSec] = useState(initTimer.sec);
-  const [start, setStart] = useState(false);
-  const [breakRound, setBreakRound] = useState(false);
-  const [round, setRound] = useState(1);
+const Timer: FC<TimerProps> = ({ initTimer, initBreakTimer, hidden }) => {
+  const roundMs = toMs(initTimer);
+  const breakMs = toMs(initBreakTimer);
 
-  const timerRef = useRef<number | undefined>(undefined);
+  const [state, setState] = useState<TimerState>(() =>
+    initialState({ roundMs, breakMs })
+  );
+  const [now, setNow] = useState(() => Date.now());
 
-  //не выключать экран во время работы
-  const requestWakeLock = async () => {
-    try {
-      await navigator.wakeLock.request("screen");
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const startTimer = () => {
-    setStart((prev) => !prev);
-  };
-
-  const decrementMin = () => {
-    setMin((prev) => prev - 1);
-    setSec(59);
-  };
-
-  const decrementSec = () => {
-    timerRef.current = setTimeout(() => setSec((prev) => prev - 1), 1000);
-    return () => clearTimeout(timerRef.current);
-  };
-
-  const playSound = (sound: string) => {
-    const startBellSound = new Audio(sound);
-    return startBellSound.play();
-  };
-
-  const startBreak = useCallback(() => {
-    playSound(bellSound);
-    setBreakRound(true);
-    setMin(initBreakTimer.min);
-    setSec(initBreakTimer.sec);
-  }, [initBreakTimer]);
-
-  const startNextRound = useCallback(() => {
-    playSound(bellSound);
-    setBreakRound(false);
-    setStart(true);
-    setRound((prev) => prev + 1);
-    setMin(initTimer.min);
-    setSec(initTimer.sec);
-  }, [initTimer]);
-
-  const resetTimer = () => {
-    setStart(false);
-    setBreakRound(false);
-    setRound(1)
-    setMin(initTimer.min);
-    setSec(initTimer.sec);
-    return clearTimeout(timerRef.current);
-  };
-
-  const isTimerFinished = min === 0 && sec === 0;
+  const stateRef = useRef(state);
+  const scheduledUntil = useRef(0);
 
   useEffect(() => {
-    if (start || breakRound) {
+    stateRef.current = state;
+  }, [state]);
 
-      requestWakeLock() // оставить экран
+  useWakeLock(state.running);
 
-      // гонг
-      if (initTimer.min === min && initTimer.sec === sec && start) {
-        playSound(bellSound);
-      }
+  useEffect(() => {
+    sounds.preload();
+    return () => sounds.cancelPending();
+  }, []);
 
-      // до конца раунда 30 сек.
-      if (min === 0 && sec === 30 && !breakRound) {
-        playSound(beep)
+  const scheduleSounds = useCallback(
+    (s: TimerState, from: number) => {
+      const to = Date.now() + SOUND_HORIZON_MS;
+      for (const e of soundEvents(s, { roundMs, breakMs }, from, to)) {
+        sounds.playAt(e.name, e.at);
       }
-      // до начала раунда 10 сек
-      if (breakRound && min === 0 && sec === 10) {
-        playSound(knock)
-      }
+      scheduledUntil.current = to;
+    },
+    [roundMs, breakMs]
+  );
 
-      // декремент минут
-      if (min > 0 && sec < 0) {
-        decrementMin();
-        return;
-      }
+  useEffect(() => {
+    if (!state.running) return;
 
-      // декремент секунд
-      if (sec >= 0 && start) {
-        decrementSec();
+    const sync = () => {
+      const t = Date.now();
+      const s = advance(stateRef.current, t, { roundMs, breakMs });
+      setNow(t);
+      setState(s);
+      if (scheduledUntil.current - t < SOUND_HORIZON_MS / 2) {
+        scheduleSounds(s, scheduledUntil.current);
       }
+    };
 
-      // изменение начала раунда и отдыха
-      if (isTimerFinished) {
-        clearTimeout(timerRef.current)
-        if (!breakRound) {
-          startBreak();
-        } else {
-          startNextRound();
-        }
-      }
-    } else {
-      return clearTimeout(timerRef.current)
+    // после возврата в приложение часы AudioContext могли стоять (iOS) — планируем звуки заново
+    const onVisibilityChange = () => {
+      if (document.visibilityState !== "visible") return;
+      const t = Date.now();
+      sounds.resume();
+      sounds.cancelPending();
+      scheduleSounds(advance(stateRef.current, t, { roundMs, breakMs }), t);
+      sync();
+    };
+
+    const id = setInterval(sync, TICK_MS);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, [state.running, roundMs, breakMs, scheduleSounds]);
+
+  const toggleTimer = () => {
+    const t = Date.now();
+    if (state.running) {
+      const s = advance(state, t, { roundMs, breakMs });
+      sounds.cancelPending();
+      setState({ ...s, running: false, remainingMs: Math.max(0, s.endAt - t) });
+      return;
     }
-  }, [
-    start,
-    sec,
-    min,
-    breakRound,
-    initTimer,
-    isTimerFinished,
-    startBreak,
-    startNextRound,
-  ]);
 
-  const timeConverter = useMemo(() => {
-    return `${min.toString().padStart(2, "0")} : ${sec
-      .toString()
-      .padStart(2, "0")}`;
-  }, [min, sec]);
+    sounds.unlock();
+    const s = { ...state, running: true, endAt: t + state.remainingMs };
+    // гонг, если раунд начинается с начала
+    if (state.phase === "round" && state.remainingMs === roundMs) {
+      sounds.playAt("bell", t);
+    }
+    scheduleSounds(s, t);
+    setNow(t);
+    setState(s);
+  };
+
+  const resetTimer = () => {
+    sounds.cancelPending();
+    setState(initialState({ roundMs, breakMs }));
+  };
+
+  const duration = phaseDuration(state.phase, { roundMs, breakMs });
+  const remainingMs = state.running
+    ? Math.min(duration, Math.max(0, state.endAt - now))
+    : state.remainingMs;
+  const totalSec = Math.ceil(remainingMs / 1000);
+  const isBreak = state.phase === "break";
+  const isTimeRunningOut =
+    state.running && !isBreak && remainingMs <= ROUND_WARNING_MS;
+
+  const className = [
+    "content",
+    state.running && "content-start",
+    isBreak && "content-break",
+    isTimeRunningOut && "content-time-is-running-out",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <div
-      className={
-        `content 
-        ${start ? "content-start" : ""} 
-        ${breakRound ? "content-break" : ""}
-        ${min === 0 && sec <= 30 && start && !breakRound ? "content-time-is-running-out" : ""}
-        `
-      }
-    >
+    <div className={className} hidden={hidden}>
       <div className="timer">
         <div className="timer__round-container">
           <span>Round</span>
-          <span>{round}</span>
+          <span>{state.round}</span>
         </div>
         <div className="timer__timer-container">
-          <span >
-            {timeConverter}
+          <span>
+            {pad(Math.floor(totalSec / 60))} : {pad(totalSec % 60)}
           </span>
         </div>
       </div>
       <div className="group-btn">
         <button onClick={resetTimer}>Reset</button>
-        <button onClick={startTimer}>{!start ? "Start" : "Pause"}</button>
+        <button onClick={toggleTimer}>{state.running ? "Pause" : "Start"}</button>
       </div>
     </div>
   );
