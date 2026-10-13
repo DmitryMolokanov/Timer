@@ -23,16 +23,18 @@ export default defineConfig({
         orientation: 'portrait',
         theme_color: BACKGROUND_COLOR,
         background_color: BACKGROUND_COLOR,
-        icons: [
-          { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'maskable-icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
-          { src: 'timer.svg', sizes: 'any', type: 'image/svg+xml' },
-        ],
+      },
+      // иконки, apple-touch-icon и заставки iOS генерируются из pwa-assets.config.ts,
+      // ссылки на них добавляются в index.html при сборке
+      pwaAssets: {
+        config: true,
+        overrideManifestIcons: true,
       },
       workbox: {
         // всё приложение, включая звуки и шрифты, кладётся в кэш при установке — работает без сети
-        globPatterns: ['**/*.{js,css,html,svg,png,mp3,woff2}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,mp3,woff2}'],
+        // заставки iOS забирает сама при добавлении на экран «Домой», в кэше они не нужны
+        globIgnores: ['**/apple-splash-*'],
         cleanupOutdatedCaches: true,
       },
     })

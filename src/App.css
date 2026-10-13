@@ -58,10 +58,6 @@
   color: white;
 }
 
-.content-time-is-running-out {
-  animation: isRunningOut 2s infinite alternate ease-in-out
-}
-
 .content-break{
   background-color: var(--break-timer-color);
   color: white;
@@ -97,6 +93,82 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* время: «мм : сс», а в конце фазы — крупные секунды в убывающем кольце (см. components/TimeDisplay.tsx) */
+.clock {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  line-height: 1.15;
+}
+
+.clock__min,
+.clock__colon {
+  display: inline-block;
+  overflow: hidden;
+  max-width: 3em;
+  transition: max-width .6s cubic-bezier(.2, .8, .2, 1), padding .6s cubic-bezier(.2, .8, .2, 1), opacity .35s;
+}
+
+.clock__colon {
+  padding: 0 .25em;
+}
+
+.clock__sec {
+  display: inline-grid;
+  transition: font-size .6s cubic-bezier(.2, .8, .2, 1);
+}
+
+/* старая и новая цифра лежат друг на друге, пока одна растворяется, а другая проявляется */
+.clock__sec > span {
+  grid-area: 1 / 1;
+  text-align: center;
+}
+
+.clock--countdown .clock__min,
+.clock--countdown .clock__colon {
+  max-width: 0;
+  padding: 0;
+  opacity: 0;
+}
+
+.clock--countdown .clock__sec {
+  font-size: min(9.5rem, 42vw, 22dvh);
+}
+
+.clock__ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(17rem, 75vw, 36dvh);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity .5s;
+  pointer-events: none;
+}
+
+.clock--countdown .clock__ring {
+  opacity: 1;
+}
+
+.clock__ring circle {
+  fill: none;
+  stroke-width: 3;
+}
+
+.clock__ring-track {
+  stroke: rgba(255, 255, 255, .25);
+}
+
+.clock__ring-arc {
+  stroke: white;
+  stroke-linecap: round;
+  /* шаг обновления таймера — 200 мс, переход сглаживает движение кольца */
+  transition: stroke-dashoffset .2s linear;
+}
+
 .group-btn {
   display: flex;
   flex: none;
@@ -112,6 +184,35 @@
   background-color: inherit;
   color: white;
   font-size: 1.3rem;
+}
+
+/* эффект нажатия, см. components/Buttons/RippleButton.tsx */
+.ripple {
+  position: relative;
+}
+
+.ripple__layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.ripple__wave {
+  position: absolute;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, .35);
+  transform: scale(0);
+  animation: ripple .55s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(1);
+    opacity: 0;
+  }
 }
 
 .settings{
@@ -183,14 +284,3 @@
   border-radius: 1rem;
 }
 
-@keyframes isRunningOut {
-  from {
-   background: var(--start-timer-color);
-  }
-  75% {
-    background: var(--start-timer-color);
-  }
-  to {
-   background: var(--break-timer-color);
-  }
-}

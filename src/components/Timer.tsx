@@ -2,19 +2,19 @@ import { useCallback, useEffect, useRef, useState, type FC } from "react";
 import type { InitTimer } from "../types/Timer";
 import { sounds } from "../audio";
 import { useWakeLock } from "../hooks/useWakeLock";
+import RippleButton from "./Buttons/RippleButton";
+import TimeDisplay from "./TimeDisplay";
 import { toMs } from "../settings";
 import {
   advance,
+  countdownWindow,
   initialState,
   phaseDuration,
   soundEvents,
-  ROUND_WARNING_MS,
   SOUND_HORIZON_MS,
   TICK_MS,
   type TimerState,
 } from "../timeline";
-
-const pad = (n: number) => n.toString().padStart(2, "0");
 
 interface TimerProps {
   initTimer: InitTimer;
@@ -116,16 +116,12 @@ const Timer: FC<TimerProps> = ({ initTimer, initBreakTimer, hidden }) => {
   const remainingMs = state.running
     ? Math.min(duration, Math.max(0, state.endAt - now))
     : state.remainingMs;
-  const totalSec = Math.ceil(remainingMs / 1000);
   const isBreak = state.phase === "break";
-  const isTimeRunningOut =
-    state.running && !isBreak && remainingMs <= ROUND_WARNING_MS;
 
   const className = [
     "content",
     state.running && "content-start",
     isBreak && "content-break",
-    isTimeRunningOut && "content-time-is-running-out",
   ]
     .filter(Boolean)
     .join(" ");
@@ -138,14 +134,17 @@ const Timer: FC<TimerProps> = ({ initTimer, initBreakTimer, hidden }) => {
           <span>{state.round}</span>
         </div>
         <div className="timer__timer-container">
-          <span>
-            {pad(Math.floor(totalSec / 60))} : {pad(totalSec % 60)}
-          </span>
+          <TimeDisplay
+            remainingMs={remainingMs}
+            countdownMs={countdownWindow(state.phase, { roundMs, breakMs })}
+          />
         </div>
       </div>
       <div className="group-btn">
-        <button onClick={resetTimer}>Reset</button>
-        <button onClick={toggleTimer}>{state.running ? "Pause" : "Start"}</button>
+        <RippleButton onClick={resetTimer}>Reset</RippleButton>
+        <RippleButton onClick={toggleTimer}>
+          {state.running ? "Pause" : "Start"}
+        </RippleButton>
       </div>
     </div>
   );

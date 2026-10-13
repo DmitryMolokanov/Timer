@@ -28,6 +28,16 @@ export const BREAK_WARNING_MS = 10_000;
 export const phaseDuration = (phase: Phase, d: Durations) =>
   phase === "round" ? d.roundMs : d.breakMs;
 
+// крупный отсчёт секунд в кольце: последние 30 сек. фазы, а короткий перерыв (до минуты) — целиком
+const COUNTDOWN_MS = 30_000;
+const SHORT_BREAK_MS = 60_000;
+
+export function countdownWindow(phase: Phase, d: Durations) {
+  const duration = phaseDuration(phase, d);
+  if (phase === "break" && duration <= SHORT_BREAK_MS) return duration;
+  return Math.min(COUNTDOWN_MS, duration);
+}
+
 export const initialState = (d: Durations): TimerState => ({
   phase: "round",
   round: 1,

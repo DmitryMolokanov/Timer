@@ -8,9 +8,12 @@ import '@fontsource/source-sans-3/latin-700.css'
 import '@fontsource/source-sans-3/cyrillic-700.css'
 import './index.css'
 import App from './App.tsx'
+import { hideSplash } from './splash'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
   </StrictMode>,
 )
+
+hideSplash()

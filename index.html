@@ -5,18 +5,85 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="description" content="Таймер раундов для тренировок по боксу" />
-  <meta name="theme-color" content="#2B2B2B" />
   <!-- iOS: запуск с домашнего экрана без интерфейса Safari -->
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Boxing Timer" />
-  <link rel="icon" href="/timer.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
   <title>Boxing Timer</title>
+  <!-- стили заставки здесь, а не в бандле: она рисуется с первого кадра; убирает её src/splash.ts -->
+  <style>
+    .splash {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #2B2B2B;
+      transition: opacity .3s ease;
+    }
+
+    .splash--leaving {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .splash__ring {
+      width: 120px;
+      height: 120px;
+    }
+
+    .splash__arc {
+      stroke-dasharray: 226.2;
+      stroke-dashoffset: 226.2;
+      animation: splash-sweep 1s .15s ease-in-out forwards;
+    }
+
+    .splash__title {
+      position: absolute;
+      top: calc(50% + 84px);
+      font-family: "Audiowide", sans-serif;
+      font-size: 20px;
+      letter-spacing: 2px;
+      color: #EEEEEE;
+      opacity: 0;
+      animation: splash-fade .4s .5s ease-out forwards;
+    }
+
+    @keyframes splash-sweep {
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    @keyframes splash-fade {
+      to {
+        opacity: 1;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .splash__arc,
+      .splash__title {
+        animation: none;
+        stroke-dashoffset: 0;
+        opacity: 1;
+      }
+    }
+  </style>
 </head>
 
 <body>
+  <div id="splash" class="splash" aria-hidden="true">
+    <svg class="splash__ring" viewBox="0 0 100 100">
+      <rect x="44" y="2" width="12" height="10" rx="3" fill="#EEEEEE" />
+      <circle cx="50" cy="56" r="36" fill="none" stroke="#3a3a3a" stroke-width="8" />
+      <circle class="splash__arc" cx="50" cy="56" r="36" fill="none" stroke="#4169e1" stroke-width="8"
+        transform="rotate(-90 50 56)" />
+    </svg>
+    <span class="splash__title">BOXING TIMER</span>
+  </div>
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
 </body>
