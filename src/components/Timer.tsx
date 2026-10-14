@@ -13,6 +13,7 @@ import {
   soundEvents,
   SOUND_HORIZON_MS,
   TICK_MS,
+  TICK_SLACK_MS,
   type TimerState,
 } from "../timeline";
 
@@ -57,6 +58,7 @@ const Timer: FC<TimerProps> = ({ initTimer, initBreakTimer }) => {
 
   useEffect(() => {
     if (!state.running) return;
+    let tickId: number | undefined;
 
     const sync = () => {
       const t = Date.now();
@@ -66,6 +68,10 @@ const Timer: FC<TimerProps> = ({ initTimer, initBreakTimer }) => {
       if (scheduledUntil.current - t < SOUND_HORIZON_MS / 2) {
         scheduleSounds(s, scheduledUntil.current);
       }
+      // тики привязаны к концу фазы: каждый пятый приходится ровно на смену секунды,
+      // и цифры меняются вместе с гонгом, а не с опозданием до TICK_MS
+      window.clearTimeout(tickId);
+      tickId = window.setTimeout(sync, ((s.endAt - t) % TICK_MS) + TICK_SLACK_MS);
     };
 
     // после возврата в приложение часы AudioContext могли стоять (iOS) — планируем звуки заново
@@ -78,10 +84,10 @@ const Timer: FC<TimerProps> = ({ initTimer, initBreakTimer }) => {
       sync();
     };
 
-    const id = setInterval(sync, TICK_MS);
+    sync();
     document.addEventListener("visibilitychange", onVisibilityChange);
     return () => {
-      clearInterval(id);
+      window.clearTimeout(tickId);
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, [state.running, roundMs, breakMs, scheduleSounds]);

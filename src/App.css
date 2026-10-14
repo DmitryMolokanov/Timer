@@ -145,6 +145,8 @@
 
 /* время: «мм : сс», а в конце фазы — крупные секунды в убывающем кольце (см. components/TimeDisplay.tsx) */
 .clock {
+  /* размер кольца; цифры внутри считаются от него, чтобы не задевать кольцо */
+  --ring-size: min(17rem, 75vw, 36dvh);
   position: relative;
   display: flex;
   align-items: center;
@@ -157,6 +159,9 @@
 .clock__colon {
   display: inline-block;
   overflow: hidden;
+  /* clip, а не hidden: hidden делает элемент областью прокрутки, и браузер забирает себе
+     горизонтальный свайп, начатый на цифрах (touch-action: pan-y корня сюда не доходит) */
+  overflow: clip;
   max-width: 3em;
   transition: max-width .6s cubic-bezier(.2, .8, .2, 1), padding .6s cubic-bezier(.2, .8, .2, 1), opacity .35s;
 }
@@ -184,14 +189,16 @@
 }
 
 .clock--countdown .clock__sec {
-  font-size: min(9.5rem, 42vw, 22dvh);
+  /* самое широкое число «40» по диагонали — 1,75 высоты шрифта, внутренний диаметр кольца — 0,89 его размера:
+     при 0,44 между цифрами и кольцом остаётся зазор около 6% */
+  font-size: calc(var(--ring-size) * .44);
 }
 
 .clock__ring {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: min(17rem, 75vw, 36dvh);
+  width: var(--ring-size);
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
   opacity: 0;
@@ -281,6 +288,8 @@
 .settings__body {
   flex: 1;
   overflow-y: auto;
+  /* своя область прокрутки: без pan-y браузер перехватывает свайп закрытия, начатый внутри */
+  touch-action: pan-y;
   padding: 4px 20px 20px;
 }
 

@@ -18,6 +18,8 @@ export interface Durations {
 }
 
 export const TICK_MS = 200;
+// тик чуть позже границы, чтобы точно попасть уже после смены секунды
+export const TICK_SLACK_MS = 5;
 // на сколько вперёд планировать звуки: при свёрнутом приложении браузер редко будит JS
 export const SOUND_HORIZON_MS = 15 * 60 * 1000;
 // до конца раунда 30 сек.
