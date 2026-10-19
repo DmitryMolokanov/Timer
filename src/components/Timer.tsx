@@ -68,6 +68,8 @@ const Timer: FC<TimerProps> = ({ initTimer, initBreakTimer }) => {
       if (scheduledUntil.current - t < SOUND_HORIZON_MS / 2) {
         scheduleSounds(s, scheduledUntil.current);
       }
+      // звуки запланированы на минуты вперёд — подгоняем их под уход часов AudioContext
+      sounds.resync();
       // тики привязаны к концу фазы: каждый пятый приходится ровно на смену секунды,
       // и цифры меняются вместе с гонгом, а не с опозданием до TICK_MS
       window.clearTimeout(tickId);

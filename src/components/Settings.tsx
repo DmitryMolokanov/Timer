@@ -1,6 +1,6 @@
 import { useState, type Dispatch, type FC, type SetStateAction } from 'react';
 import type { InitTimer } from '../types/Timer';
-import { isSameSettings, MAX_MIN, MAX_SEC, PRESETS, SEC_STEP, type TimerSettings } from '../settings';
+import { isSameSettings, MAX_MIN, MAX_SEC, PRESETS, SEC_STEP, toMs, type TimerSettings } from '../settings';
 
 interface SettingsProps {
     settings: TimerSettings
@@ -88,27 +88,24 @@ const Settings: FC<SettingsProps> = ({ settings, onSave }) => {
 
     const [timer, setTimer] = useState(settings.round)
     const [timerBreak, setTimerBreak] = useState(settings.break)
-    const [errMessage, setErrMessage] = useState('')
+    // ошибка показывается после попытки сохранить и пропадает, как только время исправлено
+    const [showError, setShowError] = useState(false)
 
     const current = { round: timer, break: timerBreak }
     const activePreset = PRESETS.find((preset) => isSameSettings(preset, current))
     // своя настройка сразу раскрыта, если сейчас стоит время не из готовых режимов
     const [isCustomOpen, setIsCustomOpen] = useState(!activePreset)
 
-    const validation = () => {
-        if (timer.min === 0 && timer.sec === 0) {
-            setErrMessage('Установите время раунда')
-            return false
-        }
-        if (timerBreak.min === 0 && timerBreak.sec === 0) {
-            setErrMessage('Установите время отдыха')
-            return false
-        }
-        return true
-    }
+    const error = toMs(timer) === 0
+        ? 'Установите время раунда'
+        : toMs(timerBreak) === 0 ? 'Установите время отдыха' : ''
+    const errMessage = showError ? error : ''
 
     const saveData = () => {
-        if (!validation()) return
+        if (error) {
+            setShowError(true)
+            return
+        }
         onSave(current)
     }
 

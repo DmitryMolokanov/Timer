@@ -71,9 +71,11 @@ export function useSlidePanel() {
 
   const close = useCallback(() => {
     if (!openRef.current) return;
-    // запись панели в истории убираем сами, popstate закроет панель
+    // закрываем сразу, а не по popstate: иначе второе нажатие ✕ до его прихода
+    // вызвало бы ещё один history.back() и увело со страницы вместе с таймером
+    settle(false);
+    // свою запись из истории убираем сами; пришедший popstate панель уже не тронет
     if (history.state?.settings) history.back();
-    else settle(false);
   }, [settle]);
 
   // системное «Назад» (Android) закрывает панель, а не приложение

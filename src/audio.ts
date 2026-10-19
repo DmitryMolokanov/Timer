@@ -12,8 +12,15 @@ const SOUND_URLS: Record<SoundName, string> = {
 
 // звук, опоздавший сильнее (например, пока приложение было свёрнуто), уже не нужен
 const MAX_LATENESS_MS = 1000;
+// расхождение часов, после которого запланированный звук переставляется
+const DRIFT_TOLERANCE_S = 0.02;
+// звук, который вот-вот начнётся, уже не трогаем: аудиопоток мог его запустить
+const RESYNC_MARGIN_S = 0.1;
 
 interface ScheduledSound {
+  name: SoundName;
+  // момент по Date.now()
+  at: number;
   source: AudioBufferSourceNode;
   startTime: number;
 }
@@ -21,6 +28,10 @@ interface ScheduledSound {
 /**
  * Звуки через Web Audio: сигналы планируются заранее на часах AudioContext,
  * поэтому звучат вовремя, даже когда браузер притормаживает таймеры JS.
+ *
+ * Часы AudioContext идут от звуковой карты и уходят от Date.now(): на телефонах
+ * и Bluetooth-наушниках на заметные доли процента, а при заминках аудиопотока
+ * просто отстают. Поэтому resync() регулярно пересчитывает уже запланированные звуки.
  */
 class SoundPlayer {
   private ctx: AudioContext | null = null;
@@ -60,7 +71,8 @@ class SoundPlayer {
       this.preload();
       this.decoding = this.data!.then(async (data) => {
         for (const name of Object.keys(data) as SoundName[]) {
-          this.buffers[name] = await ctx.decodeAudioData(data[name]);
+          // decodeAudioData забирает буфер себе — отдаём копию, чтобы после ошибки можно было повторить
+          this.buffers[name] = await ctx.decodeAudioData(data[name].slice(0));
         }
       });
       this.decoding.catch((err) => {
@@ -102,21 +114,53 @@ class SoundPlayer {
     }
   }
 
+  // переставить ещё не прозвучавшие сигналы по текущему соотношению часов
+  resync() {
+    const ctx = this.ctx;
+    if (!ctx || ctx.state !== "running") return;
+    const now = ctx.currentTime;
+    for (const item of this.scheduled) {
+      if (item.startTime <= now + RESYNC_MARGIN_S) continue;
+      const startTime = this.contextTime(ctx, item.at);
+      if (Math.abs(startTime - item.startTime) <= DRIFT_TOLERANCE_S) continue;
+      item.source.onended = null;
+      item.source.stop();
+      this.play(ctx, item, startTime);
+    }
+  }
+
   private start(name: SoundName, at: number) {
     const ctx = this.ctx;
-    const buffer = this.buffers[name];
-    if (!ctx || !buffer) return;
+    if (!ctx || !this.buffers[name]) return;
+    if (at - Date.now() < -MAX_LATENESS_MS) return;
 
-    const delayMs = at - Date.now();
-    if (delayMs < -MAX_LATENESS_MS) return;
-
-    const source = ctx.createBufferSource();
-    source.buffer = buffer;
-    source.connect(ctx.destination);
-    const item = { source, startTime: ctx.currentTime + Math.max(0, delayMs) / 1000 };
-    source.start(item.startTime);
-    source.onended = () => this.scheduled.delete(item);
+    const item = { name, at } as ScheduledSound;
+    this.play(ctx, item, this.contextTime(ctx, at));
     this.scheduled.add(item);
+  }
+
+  private play(ctx: AudioContext, item: ScheduledSound, startTime: number) {
+    const source = ctx.createBufferSource();
+    source.buffer = this.buffers[item.name]!;
+    source.connect(ctx.destination);
+    source.onended = () => this.scheduled.delete(item);
+    item.source = source;
+    item.startTime = Math.max(ctx.currentTime, startTime);
+    source.start(item.startTime);
+  }
+
+  // момент Date.now() на часах AudioContext. getOutputTimestamp говорит, какой отсчёт
+  // слышен из динамика прямо сейчас, — так учитывается и задержка вывода звука
+  private contextTime(ctx: AudioContext, at: number) {
+    const fromNow = (at - Date.now()) / 1000;
+    const ts = ctx.getOutputTimestamp?.();
+    if (ts?.contextTime && ts.performanceTime) {
+      const heardNow = ts.contextTime + (performance.now() - ts.performanceTime) / 1000;
+      // некоторые браузеры отдают устаревшую метку — тогда ей не верим
+      const lag = ctx.currentTime - heardNow;
+      if (lag >= -0.05 && lag < 0.5) return heardNow + fromNow;
+    }
+    return ctx.currentTime + fromNow;
   }
 }
 
