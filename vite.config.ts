@@ -1,13 +1,21 @@
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import { VitePWA } from 'vite-plugin-pwa'
+import pkg from './package.json' with { type: 'json' }
 
 const BACKGROUND_COLOR = '#2B2B2B'
+
+// номер версии из package.json на заставке: %APP_VERSION% в index.html
+const appVersion = (): Plugin => ({
+  name: 'app-version',
+  transformIndexHtml: (html) => html.replaceAll('%APP_VERSION%', pkg.version),
+})
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
+    appVersion(),
     VitePWA({
       // обновление по кнопке в шапке (см. App.tsx), а не автоматическая перезагрузка посреди раунда
       registerType: 'prompt',
